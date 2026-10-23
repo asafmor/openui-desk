@@ -14,6 +14,7 @@ pnpm dev:pass                          # generate spec → check programs → se
 ```
 
 - **Without `pass`:** `OPENAI_API_KEY=... pnpm dev`.
+- **gpg won't decrypt:** if `pass` fails in a non-interactive shell, run `pass agents/openai-api-key > /dev/null` once in a terminal to cache the passphrase.
 - **Model:** defaults to `openai/gpt-6.1-sol`; override with `DESK_MODEL=openai/<id>`.
 - **Without a key:** the "Feature tour" template is fully interactive. Only the chat needs the model.
 
@@ -93,5 +94,6 @@ Each feature points to the file to read and says how to try it in the UI.
 - **Restricted action slots aren't enforced.** `z.union([copy.ref, steps.OpenUrl.ref])` shapes only the prompt; any action is still accepted at runtime.
 - **MCP needs a pinned protocol.** `@mastra/mcp` 2.x speaks MCP `2026-07-28` only, so the browser needs `@modelcontextprotocol/client` 2.x with `versionNegotiation: { mode: { pin: "2026-07-28" } }`, plus extra CORS headers on the server.
 - **Mastra's chat route:** per-request data must go in `body.requestContext`; other top-level body keys don't reach tools or instructions. `chatRoute` defaults to AI SDK v5, so `version: "v7"` is set explicitly.
+- **DevTools nudge:** the DevTools widget (loaded from a CDN) sometimes shows a "Ready to share your app? … deploy" Cloud nudge. It has no prop to disable it; close it.
 - **Effect cleanup:** newer browsers make `scrollIntoView()` return a Promise, so `useEffect(() => el.scrollIntoView())` breaks React. Use a block body.
 - **Not used here.** The chat uses AI SDK `useChat` directly, so OpenUI's `vercelAIAdapter`, `ChatProvider`, `useToolActivities` and `AgentInterface` are not needed; tool parts come straight from `UIMessage.parts`. `WithPreviewRenderer` metadata comes from OpenUI Cloud and is skipped.

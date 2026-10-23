@@ -7,8 +7,7 @@
     "check": "tsx scripts/check-programs.ts",
     "prompt": "tsx scripts/print-prompt.ts",
     "typecheck": "tsc -p shared && tsc -p client && tsc -p server",
-    "predev": "pnpm generate && pnpm check",
-    "dev": "pnpm --parallel --filter @demo/server --filter @demo/client dev",
+    "dev": "pnpm generate && pnpm check && pnpm --parallel --filter @demo/server --filter @demo/client dev",
     "dev:pass": "OPENAI_API_KEY=\"$(pass agents/openai-api-key)\" pnpm dev"
   },
   "devDependencies": {

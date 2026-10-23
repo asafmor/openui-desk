@@ -17,7 +17,7 @@ export const RULES: string[] = [
   'CROSS-SURFACE CONTROL: a surface cannot @Set another surface\'s $variable. Use the custom action @Broadcast("key", value): it sets $key in EVERY surface. Use these shared keys consistently: $ticketId (selected ticket), $status, $priority (ticket filters, "all" = no filter), $days ("7" | "14" | "30"), $tab.',
   "When a surface depends on a shared key (e.g. the dock shows $ticketId), declare it with a default ($ticketId = \"\") and pass it in Query args so it re-fetches when broadcast.",
   // ── chat ──
-  "CHAT: keep prose short. A fenced openui-lang block in chat is a small, complete, throw-away program (with its own root) for an inline answer. Anything the user will keep using belongs in a surface.",
+  "CHAT: keep prose short and plain text (no Markdown: no **bold**, headings or bullet syntax; use short sentences and line breaks). A fenced openui-lang block in chat is a small, complete, throw-away program (with its own root) for an inline answer. Anything the user will keep using belongs in a surface.",
   'Every user message may end with "context and form values = [...]": that turn came from a click in a surface; the JSON holds the clicked label, form values and context.',
   // ── data ──
   "Inspect data with your read tools before writing Query defaults, but never hardcode tool results into programs: use Query()/Mutation() so surfaces stay live.",
