@@ -1,0 +1,19 @@
+{
+  "name": "openui-learning-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "pnpm --filter @demo/client exec openui --no-telemetry generate src/openui/library.ts --spec --out ../shared/generated/library.spec.json",
+    "check": "tsx scripts/check-programs.ts",
+    "prompt": "tsx scripts/print-prompt.ts",
+    "typecheck": "tsc -p shared && tsc -p client && tsc -p server",
+    "predev": "pnpm generate && pnpm check",
+    "dev": "pnpm --parallel --filter @demo/server --filter @demo/client dev",
+    "dev:pass": "OPENAI_API_KEY=\"$(pass agents/openai-api-key)\" pnpm dev"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3"
+  }
+}

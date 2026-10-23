@@ -1,0 +1,10 @@
+packages:
+  - shared
+  - server
+  - client
+
+# Only esbuild may run install scripts (needed by Mastra's bundler).
+# @openuidev/lang-core's postinstall only sends install telemetry, so it stays off.
+allowBuilds:
+  esbuild: true
+  "@openuidev/lang-core": false
