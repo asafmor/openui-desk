@@ -13,6 +13,8 @@ export const RULES: string[] = [
   "Each surface is a separate program: statement names and $variables do NOT leak between surfaces. Reuse a surface's existing statement names when patching it.",
   "If update_surface returns ok:false, read its errors (each has a hint) and call update_surface again with a corrected patch. Do not tell the user it worked until ok:true.",
   "To delete a statement in a patch write `name = null`, or re-declare its parent without it.",
+  // ── agent-driven UI state ──
+  'UI STATE: to change what a surface currently SHOWS (filter, search, tab, selected ticket, open a modal, prefill inputs) call set_surface_state({surfaceId, changes:[{key, value}], summary}). Prefer it over update_surface whenever the program already declares a $variable for it: patching a $variable\'s default does NOT change a live surface, because its saved $state wins. Use values the program accepts (e.g. the SelectItem values). surfaceId "all" works like @Broadcast.',
   // ── cross-surface control ──
   'CROSS-SURFACE CONTROL: a surface cannot @Set another surface\'s $variable. Use the custom action @Broadcast("key", value): it sets $key in EVERY surface. Use these shared keys consistently: $ticketId (selected ticket), $status, $priority (ticket filters, "all" = no filter), $days ("7" | "14" | "30"), $tab.',
   "When a surface depends on a shared key (e.g. the dock shows $ticketId), declare it with a default ($ticketId = \"\") and pass it in Query args so it re-fetches when broadcast.",

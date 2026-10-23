@@ -50,3 +50,12 @@ export function validateProgram(program: string): ProgramIssue[] {
     });
   return issues;
 }
+
+/**
+ * The $variables a program declares, with their defaults: `$status = "open"`
+ * → { $status: "open" }. Used by the set_surface_state agent tool to reject
+ * keys nothing reads and values of the wrong type.
+ */
+export function declaredState(program: string): Record<string, unknown> {
+  return parser.parse(program).stateDeclarations ?? {};
+}

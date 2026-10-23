@@ -31,6 +31,20 @@ export interface UpdateSurfaceOutput {
   errors?: { code: string; statementId?: string; message: string }[];
 }
 
+export interface SetSurfaceStateInput {
+  surfaceId?: string;
+  changes?: { key?: string; value?: unknown }[];
+  summary?: string;
+}
+
+export interface SetSurfaceStateOutput {
+  ok: boolean;
+  surfaceIds?: string[];
+  values?: Record<string, unknown>;
+  summary?: string;
+  errors?: { code: string; message: string; hint?: string }[];
+}
+
 export interface PublishArtifactOutput {
   ok: boolean;
   id: string;

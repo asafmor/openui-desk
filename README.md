@@ -78,14 +78,16 @@ Each feature points to the file to read and says how to try it in the UI.
 | 17 | Artifacts (tool result → preview card → side panel, versions) | `server/.../publish-artifact.ts`, `artifacts/*` | Ask "publish a weekly SLA report artifact" |
 | 18 | A2UI protocol (`@openuidev/a2ui`) | `server/src/a2ui/*`, `client/src/a2ui/*` | Dock tabs → "A2UI live incident" → Acknowledge → Resolve |
 | 19 | Observability bus + DevTools | `debug/*`, `main.tsx` | DevTools button; Dock tabs → "Event log" |
+| 20 | Agent drives live UI state (`set_surface_state`): sets declared `$variables` without rewriting the program; validated against `stateDeclarations`; idempotent on replay | `server/src/mastra/tools/set-surface-state.ts`, `client/src/chat/apply-tool-results.ts`, `workspace/workspace-reducer.ts` ("setStateValues") | Starter "Show me only the urgent open tickets in the canvas table" |
 
 ## Long-lived, serializable, malleable: how it works
 
 1. **A surface is data.** It has a `program` (OpenUI Lang text) and a `state` (the Renderer's snapshot of `$variables` and form fields). Mounting is `<Renderer response={program} initialState={state}>`; Queries then fetch live data again.
 2. **Saving** writes each surface in OpenUI's stored-message format, `]]>openui:content?library=support-desk@1` … `]]>openui:context {state}` … `]]>openui:end`, together with the chat transcript, artifacts and notes (`workspace/serialize.ts`).
 3. **Evolving the UI.** The agent sees every program, its live `$state` and its render errors on each request. It sends small patches through `update_surface`. The server merges and validates them, returns errors so the agent can fix them in the same turn, and the browser applies the identical merge. Every applied patch is kept as a version, so ↶ undoes it.
-4. **Cross-surface control.** Each Renderer has its own `$state`. The custom action `@Broadcast(key, value)` writes `$key` into every surface's saved state. react-lang re-applies a changed `initialState` live, so dependent Queries refetch with no remount.
-5. **Library changes.** Programs are positional. Only append optional props to existing components; never reorder or remove props. The `library` attribute in saved surfaces records which version wrote them.
+4. **Agent control of live state.** A patch that changes `$status = "open"` only changes the default; saved state wins. To change what a surface shows now, the agent calls `set_surface_state`, which writes into the same saved state the Renderer reads as `initialState`.
+5. **Cross-surface control.** Each Renderer has its own `$state`. The custom action `@Broadcast(key, value)` writes `$key` into every surface's saved state. react-lang re-applies a changed `initialState` live, so dependent Queries refetch with no remount.
+6. **Library changes.** Programs are positional. Only append optional props to existing components; never reorder or remove props. The `library` attribute in saved surfaces records which version wrote them.
 
 ## Gotchas found while building (versions as of Oct 2026)
 

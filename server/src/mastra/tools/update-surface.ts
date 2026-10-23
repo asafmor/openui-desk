@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// update_surface — the agent's ONLY way to change a long-lived surface.
+// update_surface — how the agent changes a long-lived surface's PROGRAM.
+// (To change what it currently SHOWS — filters, tab — see ./set-surface-state.ts.)
 //
 // Flow of one call (features #8 incremental editing + #13 self-correction):
 //

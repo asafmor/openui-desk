@@ -26,3 +26,10 @@ export function setSurfaceProgram(ctx: RequestContext | undefined, id: string, p
   const next = getSurfaces(ctx).map((s) => (s.id === id ? { ...s, program, errors: [] } : s));
   ctx.set(KEY, next);
 }
+
+/** set_surface_state accepted → later tool calls in this turn see the new $state. */
+export function setSurfaceStateValues(ctx: RequestContext | undefined, ids: string[], values: Record<string, unknown>) {
+  if (!ctx) return;
+  const next = getSurfaces(ctx).map((s) => (ids.includes(s.id) ? { ...s, state: { ...s.state, ...values } } : s));
+  ctx.set(KEY, next);
+}

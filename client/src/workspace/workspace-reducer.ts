@@ -23,6 +23,8 @@ export type WorkspaceAction =
   | { type: "setSurfaceErrors"; surfaceId: SurfaceId; errors: SurfaceError[] }
   // custom action @Broadcast(key, value) → write $key into every surface
   | { type: "broadcast"; key: string; value: unknown }
+  // the agent's set_surface_state tool succeeded → write its $values (same path as broadcast)
+  | { type: "setStateValues"; toolCallId: string; surfaceIds: SurfaceId[]; values: Record<string, unknown> }
   | { type: "undo"; surfaceId: SurfaceId }
   | { type: "clearSurface"; surfaceId: SurfaceId }
   | { type: "setInlineState"; key: string; state: Record<string, unknown> }
@@ -36,6 +38,14 @@ const MAX_HISTORY = 30;
 
 function withSurface(ws: Workspace, id: SurfaceId, patch: Partial<Workspace["surfaces"][SurfaceId]>): Workspace {
   return { ...ws, surfaces: { ...ws.surfaces, [id]: { ...ws.surfaces[id], ...patch } } };
+}
+
+/** Merge values into the saved state of some surfaces. Each SurfaceView passes
+ *  that state as <Renderer initialState>, which re-applies changed values live. */
+function writeState(ws: Workspace, ids: readonly SurfaceId[], values: Record<string, unknown>): Workspace {
+  let next = ws;
+  for (const id of ids) next = withSurface(next, id, { state: { ...next.surfaces[id].state, ...values } });
+  return next;
 }
 
 function reduceWorkspace(ws: Workspace, action: WorkspaceAction): Workspace {
@@ -54,14 +64,14 @@ function reduceWorkspace(ws: Workspace, action: WorkspaceAction): Workspace {
     }
     case "setSurfaceState":
       return withSurface(ws, action.surfaceId, { state: action.state });
-    case "broadcast": {
+    case "broadcast":
       // `$` prefix = a reactive binding in Renderer state (initialState contract).
-      let next = ws;
-      for (const id of SURFACE_IDS) {
-        next = withSurface(next, id, { state: { ...next.surfaces[id].state, [`$${action.key}`]: action.value } });
-      }
-      return next;
-    }
+      return writeState(ws, SURFACE_IDS, { [`$${action.key}`]: action.value });
+    case "setStateValues":
+      // Idempotent like applyPatch: replaying old chat after a reload or import
+      // must not overwrite filters the user changed since.
+      if (ws.appliedToolCalls.includes(action.toolCallId)) return ws;
+      return { ...writeState(ws, action.surfaceIds, action.values), appliedToolCalls: [...ws.appliedToolCalls, action.toolCallId] };
     case "undo": {
       const surface = ws.surfaces[action.surfaceId];
       const previous = surface.history.at(-1);

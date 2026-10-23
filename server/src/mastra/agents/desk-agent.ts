@@ -15,6 +15,7 @@ import { surfaceContext } from "../prompt/surface-context";
 import { getSurfaces } from "../request-context";
 import { agentDataTools } from "../tools/agent-data-tools";
 import { publishArtifact } from "../tools/publish-artifact";
+import { setSurfaceState } from "../tools/set-surface-state";
 import { updateSurface } from "../tools/update-surface";
 
 export const DESK_AGENT_ID = "desk-agent";
@@ -25,7 +26,7 @@ export const deskAgent = new Agent({
   // Mastra model-router id: "provider/model". Override with DESK_MODEL.
   model: process.env.DESK_MODEL ?? "openai/gpt-6.1-sol",
   instructions: ({ requestContext }) => BASE_SYSTEM_PROMPT + surfaceContext(getSurfaces(requestContext)),
-  tools: { ...agentDataTools, update_surface: updateSurface, publish_artifact: publishArtifact },
+  tools: { ...agentDataTools, update_surface: updateSurface, set_surface_state: setSurfaceState, publish_artifact: publishArtifact },
   // Room for: inspect data → patch 2-4 surfaces → fix a failed patch → answer.
   defaultOptions: { maxSteps: 14 },
 });

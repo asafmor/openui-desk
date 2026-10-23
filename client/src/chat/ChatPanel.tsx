@@ -8,6 +8,7 @@ const STARTERS = [
   "Add a pie chart of tickets by priority next to the existing charts",
   "Make the dock show the selected ticket with a comment form",
   "Add an auto-refreshing activity feed to the rail",
+  "Show me only the urgent open tickets in the canvas table",
 ];
 
 export function ChatPanel({ chat }: { chat: ReturnType<typeof useDeskChat> }) {
