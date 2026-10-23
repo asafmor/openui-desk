@@ -23,23 +23,23 @@
   --radius: 10px;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1117;
-    --panel: #161b22;
-    --sunk: #0b0f14;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --border: #2a313c;
-    --accent: #818cf8;
-    --accent-text: #0e1117;
-    --info: #60a5fa;
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --danger: #fb7185;
-    --neutral: #9aa4b2;
-    color-scheme: dark;
-  }
+/* Dark tokens: <html data-theme="dark">, set by actions/theme.ts (OS preference
+   on first visit, then the @ToggleTheme() custom action). */
+:root[data-theme="dark"] {
+  --bg: #0e1117;
+  --panel: #161b22;
+  --sunk: #0b0f14;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --border: #2a313c;
+  --accent: #818cf8;
+  --accent-text: #0e1117;
+  --info: #60a5fa;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #fb7185;
+  --neutral: #9aa4b2;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }

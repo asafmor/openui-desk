@@ -10,11 +10,14 @@
 import { OpenUIDevtools } from "@openuidev/devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { initTheme } from "./actions/theme";
 import { App } from "./App";
 import "./styles.css";
 import { loadAutosave } from "./workspace/storage";
 import { TEMPLATES } from "./workspace/templates";
 import { WorkspaceProvider } from "./workspace/WorkspaceContext";
+
+initTheme(); // before first paint, so there is no light flash in dark mode
 
 // Resume exactly where we left off; first visit starts with the feature tour.
 const initial = loadAutosave() ?? TEMPLATES[0].create();

@@ -12,6 +12,7 @@
 //   CopyToClipboard          custom action                 navigator.clipboard
 //   Broadcast                custom action                 set $key in every surface
 //   Notify                   custom action                 toast
+//   ToggleTheme              custom action                 flip <html data-theme> (theme.ts)
 //
 // The event type is a typed union derived from the library's custom actions
 // (LibraryActionEvent<typeof library>), so `event.params` is narrowed per case.
@@ -19,6 +20,7 @@
 import type { ActionTurn } from "@demo/shared/protocol/action-message";
 import { BuiltinActionType, type LibraryActionEvent } from "@openuidev/react-lang";
 import type { AppLibrary } from "../openui/library";
+import { toggleTheme } from "./theme";
 import { showToast } from "./toasts";
 
 export interface ActionHost {
@@ -47,6 +49,9 @@ export function handleAction(event: LibraryActionEvent<AppLibrary>, origin: stri
       return;
     case "Notify":
       showToast(event.params.message, event.params.tone ?? "info");
+      return;
+    case "ToggleTheme":
+      toggleTheme();
       return;
   }
 }

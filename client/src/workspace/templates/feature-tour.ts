@@ -9,8 +9,9 @@
 //   #3 Query/Mutation        list_tickets, ticket_stats (refresh 30s), system_health (5s)
 //   #4 action chains         Action([@Run(m), @Run(q), @Reset(..), @Set(..), @Notify(..)])
 //   #5 custom functions      @Percent @Duration @Tone @PriorityTone @ShortTime
-//   #6 custom actions        @Broadcast @CopyToClipboard @Notify, ShareButton slot
+//   #6 custom actions        @Broadcast @CopyToClipboard @Notify @ToggleTheme, ShareButton slot
 //   #7 forms & validation    create/edit/comment/notes forms with rules
+//   data-shaped layout       canvas: the Agents tab exists only while stats.open > 15
 //   #11 streaming-aware      HtmlFrame (Lab tab), Kpi dims while loading
 //   browser-only tools       list_notes / add_note in the rail
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ title = TextContent("Desk navigation", "heading")
 views = Menu("Saved views", [MenuItem("Urgent & open", Action([@Broadcast("status", "open"), @Broadcast("priority", "urgent"), @Broadcast("tab", "tickets")]), "open · urgent"), MenuItem("Waiting on customer", Action([@Broadcast("status", "pending"), @Broadcast("priority", "all"), @Broadcast("tab", "tickets")]), "pending"), MenuItem("Everything", Action([@Broadcast("status", "all"), @Broadcast("priority", "all"), @Broadcast("tab", "tickets")])), MenuItem("Overview charts", @Broadcast("tab", "overview"))])
 $days = "14"
 windowCard = Card([Stack([Select("days", [SelectItem("7", "Last 7 days"), SelectItem("14", "Last 14 days"), SelectItem("30", "Last 30 days")], null, null, $days), Button("Apply to all surfaces", @Broadcast("days", $days), "secondary")])], "Time window")
-quick = Card([Stack([Button("What's urgent?", @ToAssistant("What needs my attention right now?", {source: "rail"}), "ghost"), ShareButton("OpenUI docs", @OpenUrl("https://www.openui.com/docs"))])], "Quick actions")
+quick = Card([Stack([Button("What's urgent?", @ToAssistant("What needs my attention right now?", {source: "rail"}), "ghost"), ShareButton("OpenUI docs", @OpenUrl("https://www.openui.com/docs")), Button("Toggle theme", @ToggleTheme(), "ghost")])], "Quick actions")
 notes = Query("list_notes", {}, {rows: []})
 $note = ""
 saveNote = Mutation("add_note", {text: $note})
@@ -42,7 +43,7 @@ notesCard = Card([notesForm, Table([Col("Note", notes.rows.text)], "No notes yet
 
 const canvas = `root = Stack([tabs])
 $tab = "overview"
-tabs = Tabs([overviewTab, ticketsTab, agentsTab, labTab], $tab)
+tabs = Tabs([overviewTab, ticketsTab, stats.open > 15 ? agentsTab : null, labTab], $tab)
 $days = "14"
 stats = Query("ticket_stats", {days: $days}, {open: 0, pending: 0, breached: 0, resolved: 0, byStatus: [], byPriority: [], daily: []})
 breachWarning = stats.breached > 0 ? Callout("danger", stats.breached + " active tickets breached their SLA", "Use the Urgent view in the rail to triage them.") : Callout("success", "All active tickets are within SLA")
@@ -63,7 +64,7 @@ $newTitle = ""
 $newCustomer = ""
 $newPriority = "medium"
 createTicket = Mutation("create_ticket", {title: $newTitle, customer: $newCustomer, priority: $newPriority})
-createModal = Modal("New ticket", $showCreate, [Form("create", Buttons([Button("Create", Action([@Run(createTicket), @Run(tickets), @Reset($newTitle, $newCustomer, $newPriority), @Set($showCreate, false), @Notify("Ticket created", "success")])), Button("Cancel", @Set($showCreate, false), "secondary")]), [FormControl("Title", Input("newTitle", "What is broken?", "text", {required: true, minLength: 3}, $newTitle)), FormControl("Customer", Input("newCustomer", "Acme", "text", {required: true}, $newCustomer)), FormControl("Priority", Select("newPriority", [SelectItem("low", "Low"), SelectItem("medium", "Medium"), SelectItem("high", "High"), SelectItem("urgent", "Urgent")], null, {required: true}, $newPriority))]), createTicket.status == "error" ? Callout("danger", "Create failed", createTicket.error) : null])
+createModal = Modal("New ticket", $showCreate, [Form("create", Buttons([Button("Create", Action([@Run(createTicket), @Run(tickets), @Run(stats), @Reset($newTitle, $newCustomer, $newPriority), @Set($showCreate, false), @Notify("Ticket created", "success")])), Button("Cancel", @Set($showCreate, false), "secondary")]), [FormControl("Title", Input("newTitle", "What is broken?", "text", {required: true, minLength: 3}, $newTitle)), FormControl("Customer", Input("newCustomer", "Acme", "text", {required: true}, $newCustomer)), FormControl("Priority", Select("newPriority", [SelectItem("low", "Low"), SelectItem("medium", "Medium"), SelectItem("high", "High"), SelectItem("urgent", "Urgent")], null, {required: true}, $newPriority))]), createTicket.status == "error" ? Callout("danger", "Create failed", createTicket.error) : null])
 $showEdit = false
 $editId = ""
 $editStatus = "open"
@@ -71,7 +72,7 @@ $editPriority = "medium"
 $editAssignee = ""
 agents = Query("list_agents", {}, {rows: []})
 updateTicket = Mutation("update_ticket", {id: $editId, status: $editStatus, priority: $editPriority, assignee: $editAssignee})
-editModal = Modal("Edit " + $editId, $showEdit, [Form("edit", Buttons([Button("Save", Action([@Run(updateTicket), @Run(tickets), @Set($showEdit, false), @Notify("Saved " + $editId, "success")])), Button("Cancel", @Set($showEdit, false), "secondary")]), [FormControl("Status", Select("editStatus", [SelectItem("open", "Open"), SelectItem("pending", "Pending"), SelectItem("resolved", "Resolved"), SelectItem("closed", "Closed")], null, {required: true}, $editStatus)), FormControl("Priority", Select("editPriority", [SelectItem("low", "Low"), SelectItem("medium", "Medium"), SelectItem("high", "High"), SelectItem("urgent", "Urgent")], null, {required: true}, $editPriority)), FormControl("Assignee", Select("editAssignee", @Each(agents.rows, "a", SelectItem(a.name, a.name + " · " + a.open + " open")), "Pick an agent", null, $editAssignee))]), updateTicket.status == "error" ? Callout("danger", "Save failed", updateTicket.error) : null])
+editModal = Modal("Edit " + $editId, $showEdit, [Form("edit", Buttons([Button("Save", Action([@Run(updateTicket), @Run(tickets), @Run(stats), @Set($showEdit, false), @Notify("Saved " + $editId, "success")])), Button("Cancel", @Set($showEdit, false), "secondary")]), [FormControl("Status", Select("editStatus", [SelectItem("open", "Open"), SelectItem("pending", "Pending"), SelectItem("resolved", "Resolved"), SelectItem("closed", "Closed")], null, {required: true}, $editStatus)), FormControl("Priority", Select("editPriority", [SelectItem("low", "Low"), SelectItem("medium", "Medium"), SelectItem("high", "High"), SelectItem("urgent", "Urgent")], null, {required: true}, $editPriority)), FormControl("Assignee", Select("editAssignee", @Each(agents.rows, "a", SelectItem(a.name, a.name + " · " + a.open + " open")), "Pick an agent", null, $editAssignee))]), updateTicket.status == "error" ? Callout("danger", "Save failed", updateTicket.error) : null])
 ticketsTab = TabItem("tickets", "Tickets", [filters, toolbar, tbl, createModal, editModal])
 agentsTab = TabItem("agents", "Agents", [Card([Table([Col("Agent", agents.rows.name), Col("Team", agents.rows.team), Col("Open load", @Each(agents.rows, "a", Badge(a.open, @Tone(a.open, 4, 6))), "right")])], "Team load"), Card([BarChart(agents.rows.name, [Series("Open tickets", agents.rows.open)])], "Open tickets per agent")])
 labTab = TabItem("lab", "Lab", [Callout("info", "Open-ended HTML", "HtmlFrame renders model-written HTML in a sandboxed iframe. While a program streams it shows the incoming source instead."), HtmlFrame("SLA heartbeat", "<style>body{font-family:sans-serif;display:grid;place-items:center;height:100vh;margin:0;background:#0b1020;color:#fff}.dot{width:70px;height:70px;border-radius:50%;background:#f43f5e;animation:p 1.2s infinite}@keyframes p{50%{transform:scale(1.3);opacity:.5}}</style><div><div class='dot'></div><p>SLA heartbeat</p></div>", 220)])`;

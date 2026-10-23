@@ -60,11 +60,11 @@ Each feature points to the file to read and says how to try it in the UI.
 | # | Feature | Read | Try it |
 | --- | --- | --- | --- |
 | 1 | Reactive `$state`, two-way binding | `components/inputs/useValidatedField.ts`, `components/layout/Tabs.tsx`, `Modal.tsx` | Canvas → Tickets: change Status/Priority/Search; open `</>` to watch `$state` |
-| 2 | Expressions & built-ins (`@Filter @Sort @Count @Avg @Each`, pluck, ternaries) | `workspace/templates/feature-tour.ts` (canvas) | "Only SLA breached" checkbox (client-side `@Filter`); summary line |
+| 2 | Expressions & built-ins (`@Filter @Sort @Count @Avg @Each`, pluck, ternaries) | `workspace/templates/feature-tour.ts` (canvas) | "Only SLA breached" checkbox (client-side `@Filter`); summary line; the canvas **Agents** tab exists only while `stats.open > 15` (create a ticket → it appears, resolve one → it goes) |
 | 3 | UI-side tools: `Query`/`Mutation`, refresh interval, `toolProvider` as function map **or** MCP client, browser-only tools | `shared/src/ui-tools/contracts.ts`, `openui/tool-provider/*`, `server/src/mastra/routes/ui-tools-route.ts`, `mcp/desk-mcp-server.ts` | Top strip refreshes (5s/30s); header "Tools via → MCP client"; rail Notes |
 | 4 | Action chains `Action([@Run, @Set, @Reset, @ToAssistant…])` | `components/inputs/useRunAction.ts` | New ticket / Edit / Escalate / Add comment |
 | 5 | Custom functions | `openui/functions/*` | `@Percent` (top strip), `@Duration`, `@Tone`, `@PriorityTone`, `@ShortTime` |
-| 6 | Custom actions, typed `onAction`, restricted action slot | `openui/actions/*`, `actions/handle-action.ts`, `components/inputs/ShareButton.tsx` | Rail "Saved views" (`@Broadcast`), dock "Copy id", toasts (`@Notify`) |
+| 6 | Custom actions, typed `onAction`, restricted action slot | `openui/actions/*`, `actions/handle-action.ts`, `actions/theme.ts`, `components/inputs/ShareButton.tsx` | Rail "Saved views" (`@Broadcast`), dock "Copy id", toasts (`@Notify`), rail "Toggle theme" (`@ToggleTheme`) |
 | 7 | Forms & validation rules | `components/inputs/Form.tsx`, `FormControl.tsx`, `useValidatedField.ts` | Click Create with empty fields |
 | 8 | Incremental editing (`editMode`, `mergeStatements`) | `shared/src/program/apply-patch.ts`, `server/src/mastra/tools/update-surface.ts`, `chat/apply-tool-results.ts` | Ask "add a pie chart by priority to the overview"; the tool card shows the patch; ↶ undoes |
 | 9 | Inline mode (prose + fenced UI) | `chat/split-inline.ts`, `chat/AssistantText.tsx` | Ask "show me the 3 oldest urgent tickets here in the chat" |
