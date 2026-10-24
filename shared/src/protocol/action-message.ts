@@ -16,9 +16,10 @@
 //     context and form values = ["User clicked: Summarize", {...}, {...}]
 //
 // buildMessage/parseMessage come from @openuidev/lang-core and write/read the
-// marker lines. This file is shared so the client (which writes the message,
-// client/src/actions/continue-conversation.ts) and the server (which converts
-// it for the model, server/src/mastra/routes/chat-route.ts) agree on the format.
+// marker lines. Writers: client/src/chat/useDeskChat.ts (sendActionTurn, fed by
+// client/src/actions/handlers/continue-conversation.ts). Readers: the chat
+// transcript (client/src/chat/MessageView.tsx) and the transport, which turns it
+// into plain model text with toModelText (client/src/chat/chat-transport.ts).
 // ─────────────────────────────────────────────────────────────────────────────
 import { buildMessage, parseMessage } from "@openuidev/lang-core";
 

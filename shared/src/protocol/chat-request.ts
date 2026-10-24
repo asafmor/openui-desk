@@ -7,8 +7,9 @@
 // errors (feature #13: "send the structured error list in the next request").
 //
 // Client: client/src/chat/chat-transport.ts puts it into the request body.
-// Server: server/src/mastra/routes/chat-route.ts reads it into the agent's
-//         RequestContext, where the prompt and the update_surface tool use it.
+// Server: Mastra's chatRoute (server/src/mastra/index.ts) turns body.requestContext
+//         into the agent's RequestContext, where the prompt and the tools use it
+//         (server/src/mastra/request-context.ts).
 // ─────────────────────────────────────────────────────────────────────────────
 import type { SurfaceId } from "../surfaces";
 

@@ -15,7 +15,7 @@
 //
 //   browser: watches the streamed tool part; when output.ok is true it applies
 //            applyPatch(currentProgram, patch) itself (shared/src/program/apply-patch.ts)
-//            (client/src/chat/apply-surface-patches.ts). Server and browser run
+//            (client/src/chat/tool-results/update-surface.ts). Server and browser run
 //            the same deterministic merge, so they stay in sync.
 //
 // While the model is still writing `patch`, the AI SDK streams the partial
