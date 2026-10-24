@@ -14,9 +14,9 @@ export interface WorkspaceState {
   errors: SurfaceErrors;
 }
 
-export type WorkspaceAction =
+export type BaseWorkspaceAction =
   // The agent's update_surface tool succeeded → merge its patch (feature #8)
-  | { type: "applyPatch"; toolCallId: string; surfaceId: SurfaceId; patch: string; summary: string }
+  | { type: "applyPatch"; surfaceId: SurfaceId; patch: string; summary: string }
   // <Renderer onStateUpdate> → remember $state + form values (feature #15)
   | { type: "setSurfaceState"; surfaceId: SurfaceId; state: Record<string, unknown> }
   // <Renderer onError> → shown in the UI and sent with the next request (feature #13)
@@ -24,15 +24,22 @@ export type WorkspaceAction =
   // custom action @Broadcast(key, value) → write $key into every surface
   | { type: "broadcast"; key: string; value: unknown }
   // the agent's set_surface_state tool succeeded → write its $values (same path as broadcast)
-  | { type: "setStateValues"; toolCallId: string; surfaceIds: SurfaceId[]; values: Record<string, unknown> }
+  | { type: "setStateValues"; surfaceIds: SurfaceId[]; values: Record<string, unknown> }
   | { type: "undo"; surfaceId: SurfaceId }
   | { type: "clearSurface"; surfaceId: SurfaceId }
   | { type: "setInlineState"; key: string; state: Record<string, unknown> }
-  | { type: "addArtifact"; toolCallId: string; artifact: Omit<Artifact, "version" | "at"> }
+  | { type: "addArtifact"; artifact: Omit<Artifact, "version" | "at"> }
   | { type: "addNote"; note: Note }
   | { type: "setChat"; chat: UIMessage[] }
   | { type: "rename"; name: string }
   | { type: "replace"; workspace: Workspace };
+
+export type WorkspaceAction =
+  | BaseWorkspaceAction
+  // An agent tool call finished → apply its actions ONCE per toolCallId
+  // (client/src/chat/apply-tool-results.ts). The id is persisted, so replaying
+  // the chat after a reload or import does not apply anything twice.
+  | { type: "toolCall"; toolCallId: string; actions: BaseWorkspaceAction[] };
 
 const MAX_HISTORY = 30;
 
@@ -50,17 +57,18 @@ function writeState(ws: Workspace, ids: readonly SurfaceId[], values: Record<str
 
 function reduceWorkspace(ws: Workspace, action: WorkspaceAction): Workspace {
   switch (action.type) {
-    case "applyPatch": {
+    case "toolCall": {
       if (ws.appliedToolCalls.includes(action.toolCallId)) return ws; // already applied (e.g. after import)
+      const next = action.actions.reduce(reduceWorkspace, ws);
+      return { ...next, appliedToolCalls: [...next.appliedToolCalls, action.toolCallId] };
+    }
+    case "applyPatch": {
       const surface = ws.surfaces[action.surfaceId];
       const history = [...surface.history, { program: surface.program, summary: action.summary, at: new Date().toISOString() }];
-      return {
-        ...withSurface(ws, action.surfaceId, {
-          program: applyPatch(surface.program, action.patch),
-          history: history.slice(-MAX_HISTORY),
-        }),
-        appliedToolCalls: [...ws.appliedToolCalls, action.toolCallId],
-      };
+      return withSurface(ws, action.surfaceId, {
+        program: applyPatch(surface.program, action.patch),
+        history: history.slice(-MAX_HISTORY),
+      });
     }
     case "setSurfaceState":
       return withSurface(ws, action.surfaceId, { state: action.state });
@@ -68,10 +76,7 @@ function reduceWorkspace(ws: Workspace, action: WorkspaceAction): Workspace {
       // `$` prefix = a reactive binding in Renderer state (initialState contract).
       return writeState(ws, SURFACE_IDS, { [`$${action.key}`]: action.value });
     case "setStateValues":
-      // Idempotent like applyPatch: replaying old chat after a reload or import
-      // must not overwrite filters the user changed since.
-      if (ws.appliedToolCalls.includes(action.toolCallId)) return ws;
-      return { ...writeState(ws, action.surfaceIds, action.values), appliedToolCalls: [...ws.appliedToolCalls, action.toolCallId] };
+      return writeState(ws, action.surfaceIds, action.values);
     case "undo": {
       const surface = ws.surfaces[action.surfaceId];
       const previous = surface.history.at(-1);
@@ -83,10 +88,9 @@ function reduceWorkspace(ws: Workspace, action: WorkspaceAction): Workspace {
     case "setInlineState":
       return { ...ws, inlineState: { ...ws.inlineState, [action.key]: action.state } };
     case "addArtifact": {
-      if (ws.appliedToolCalls.includes(action.toolCallId)) return ws;
       const versions = ws.artifacts.filter((a) => a.id === action.artifact.id).length;
       const artifact = { ...action.artifact, version: versions + 1, at: new Date().toISOString() };
-      return { ...ws, artifacts: [...ws.artifacts, artifact], appliedToolCalls: [...ws.appliedToolCalls, action.toolCallId] };
+      return { ...ws, artifacts: [...ws.artifacts, artifact] };
     }
     case "addNote":
       return { ...ws, notes: [action.note, ...ws.notes] };

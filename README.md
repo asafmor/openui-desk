@@ -26,7 +26,7 @@ pnpm dev:pass                          # generate spec → check programs → se
 | Script | What |
 | --- | --- |
 | `pnpm generate` | OpenUI CLI: component library → `shared/generated/library.spec.json` (the server prompts with it) |
-| `pnpm check` | parses every hand-written program (prompt examples + templates) against the spec |
+| `pnpm check` | parses every hand-written program (prompt examples + templates) against the spec; checks the tool-result pipeline applies each call once |
 | `pnpm prompt` | prints the exact system prompt the agent receives. **Read it once.** |
 | `pnpm typecheck` | `tsc` for shared, client and server |
 
@@ -66,7 +66,7 @@ Each feature points to the file to read and says how to try it in the UI.
 | 5 | Custom functions | `openui/functions/*` | `@Percent` (top strip), `@Duration`, `@Tone`, `@PriorityTone`, `@ShortTime` |
 | 6 | Custom actions, typed `onAction`, restricted action slot | `openui/actions/*`, `actions/handle-action.ts` + `actions/handlers/*` (typed registry), `components/inputs/ShareButton.tsx` | Rail "Saved views" (`@Broadcast`), dock "Copy id", toasts (`@Notify`), rail "Toggle theme" (`@ToggleTheme`) |
 | 7 | Forms & validation rules | `components/inputs/Form.tsx`, `FormControl.tsx`, `useValidatedField.ts` | Click Create with empty fields |
-| 8 | Incremental editing (`editMode`, `mergeStatements`) | `shared/src/program/apply-patch.ts`, `server/src/mastra/tools/update-surface.ts`, `chat/apply-tool-results.ts` | Ask "add a pie chart by priority to the overview"; the tool card shows the patch; ↶ undoes |
+| 8 | Incremental editing (`editMode`, `mergeStatements`) | `shared/src/program/apply-patch.ts`, `server/src/mastra/tools/update-surface.ts`, `chat/apply-tool-results.ts` + `chat/tool-results/*` (applier registry) | Ask "add a pie chart by priority to the overview"; the tool card shows the patch; ↶ undoes |
 | 9 | Inline mode (prose + fenced UI) | `chat/split-inline.ts`, `chat/AssistantText.tsx` | Ask "show me the 3 oldest urgent tickets here in the chat" |
 | 10 | Bindable custom components (`reactive()` + `useStateField`) | `components/layout/Tabs.tsx`, `components/inputs/*` | Rail menu switches the canvas tab via `$tab` |
 | 11 | Streaming-aware components | `components/content/HtmlFrame.tsx`, `Kpi.tsx` | Canvas → Lab; ask the agent for a new HtmlFrame |
@@ -78,7 +78,7 @@ Each feature points to the file to read and says how to try it in the UI.
 | 17 | Artifacts (tool result → preview card → side panel, versions) | `server/.../publish-artifact.ts`, `artifacts/*` | Ask "publish a weekly SLA report artifact" |
 | 18 | A2UI protocol (`@openuidev/a2ui`) | `server/src/a2ui/*`, `client/src/a2ui/*` | Dock tabs → "A2UI live incident" → Acknowledge → Resolve |
 | 19 | Observability bus + DevTools | `debug/*`, `main.tsx` | DevTools button; Dock tabs → "Event log" |
-| 20 | Agent drives live UI state (`set_surface_state`): sets declared `$variables` without rewriting the program; validated against `stateDeclarations`; idempotent on replay | `server/src/mastra/tools/set-surface-state.ts`, `client/src/chat/apply-tool-results.ts`, `workspace/workspace-reducer.ts` ("setStateValues") | Starter "Show me only the urgent open tickets in the canvas table" |
+| 20 | Agent drives live UI state (`set_surface_state`): sets declared `$variables` without rewriting the program; validated against `stateDeclarations`; idempotent on replay | `server/src/mastra/tools/set-surface-state.ts`, `client/src/chat/tool-results/set-surface-state.ts`, `workspace/workspace-reducer.ts` ("toolCall", "setStateValues") | Starter "Show me only the urgent open tickets in the canvas table" |
 
 ## Long-lived, serializable, malleable: how it works
 

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "generate": "pnpm --filter @demo/client exec openui --no-telemetry generate src/openui/library.ts --spec --out ../shared/generated/library.spec.json",
-    "check": "tsx scripts/check-programs.ts",
+    "check": "tsx scripts/check-programs.ts && tsx scripts/check-tool-results.ts",
     "prompt": "tsx scripts/print-prompt.ts",
     "typecheck": "tsc -p shared && tsc -p client && tsc -p server",
     "dev": "pnpm generate && pnpm check && pnpm --parallel --filter @demo/server --filter @demo/client dev",
