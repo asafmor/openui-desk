@@ -6,7 +6,7 @@
 // Path of a click (same as @Notify / @CopyToClipboard):
 //   1. Button → useRunAction runs the chain; @ToggleTheme is not a built-in
 //      step, so the Renderer emits ActionEvent { type: "ToggleTheme", params: {} }
-//   2. <Renderer onAction> → client/src/actions/handle-action.ts ("ToggleTheme")
+//   2. <Renderer onAction> → client/src/actions/handle-action.ts → handlers/toggle-theme.ts
 //   3. client/src/actions/theme.ts flips <html data-theme>; styles.css swaps tokens
 //
 // No params: the host owns the current theme, the program just asks to flip it.
