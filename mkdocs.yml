@@ -1,0 +1,101 @@
+site_name: OpenUI Desk
+site_description: Portable patterns for long-lived generative UIs with OpenUI and Mastra, one concept at a time.
+site_url: https://asafmor.github.io/openui-desk/
+repo_url: https://github.com/asafmor/openui-desk
+repo_name: asafmor/openui-desk
+edit_uri: edit/main/docs/
+copyright: MIT licensed · a learning demo, not an official OpenUI or Mastra project
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-night, name: Switch to dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-sunny, name: Switch to light mode }
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.details
+  - pymdownx.highlight: { anchor_linenums: true }
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed: { alternate_style: true }
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Architecture: architecture.md
+  - Concepts:
+      - Long-lived surfaces:
+          - Surface modeling: concepts/surfaces.md
+          - Persist & resume: concepts/persistence.md
+          - Cross-surface control: concepts/cross-surface.md
+          - Host-owned preferences: concepts/preferences.md
+      - Agent ↔ UI:
+          - Live UI context for the agent: concepts/workspace-context.md
+          - Agent edits surfaces: concepts/agent-edits.md
+          - Agent drives live state: concepts/agent-state.md
+          - Applying tool results: concepts/tool-results.md
+          - Proposals (human in the loop): concepts/proposals.md
+          - Clicks that talk to the agent: concepts/action-turns.md
+          - Inline UI in chat: concepts/inline-ui.md
+          - Artifacts: concepts/artifacts.md
+      - Components & language:
+          - Your own component library: concepts/component-library.md
+          - Restricting components per surface: concepts/restricted-components.md
+          - Custom functions: concepts/custom-functions.md
+          - Data-shaped UI: concepts/data-shaped-ui.md
+          - Prompt generation: concepts/prompt.md
+      - Data & actions:
+          - UI-side tools (Query / Mutation): concepts/ui-tools.md
+          - Custom actions & the host: concepts/custom-actions.md
+      - Reliability & debugging:
+          - Fixing errors with the agent: concepts/self-correction.md
+          - Runtime diagnostics: concepts/diagnostics.md
+      - Protocols:
+          - A2UI: concepts/a2ui.md
+  - Porting:
+      - You already have chat & history: porting/own-chat.md
+      - No shared client/server package: porting/no-shared-package.md
+      - Persisting on the server: porting/server-persistence.md
+  - Decision guides: guides/decisions.md
+  - Reference:
+      - OpenUI advanced features tour: reference/openui-features.md
+      - Gotchas & version notes: reference/gotchas.md
+      - Decision log: reference/decision-log.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

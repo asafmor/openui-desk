@@ -5,6 +5,8 @@ A chat surrounded by four **surfaces** (top strip, left rail, main canvas, botto
 - Self-hosted: Vite + React client, Mastra agent server, AI SDK v7 UIMessage protocol. No OpenUI Cloud, Gateway or Autofix.
 - Every component is written for this demo, in `client/src/openui/components`. `@openuidev/react-ui` is not used.
 
+**📖 Docs site: https://asafmor.github.io/openui-desk/** explains every concept and how to port it to your own Mastra + OpenUI app, one concept at a time.
+
 ## Run it
 
 ```bash
@@ -99,3 +101,7 @@ Each feature points to the file to read and says how to try it in the UI.
 - **DevTools nudge:** the DevTools widget (loaded from a CDN) sometimes shows a "Ready to share your app? … deploy" Cloud nudge. It has no prop to disable it; close it.
 - **Effect cleanup:** newer browsers make `scrollIntoView()` return a Promise, so `useEffect(() => el.scrollIntoView())` breaks React. Use a block body.
 - **Not used here.** The chat uses AI SDK `useChat` directly, so OpenUI's `vercelAIAdapter`, `ChatProvider`, `useToolActivities` and `AgentInterface` are not needed; tool parts come straight from `UIMessage.parts`. `WithPreviewRenderer` metadata comes from OpenUI Cloud and is skipped.
+
+## License
+
+MIT. See [LICENSE](LICENSE). A learning demo; not an official OpenUI or Mastra project.
